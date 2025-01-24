@@ -8,6 +8,16 @@ pipeline {
         }
         stage('Build Backend') {
             steps {
+                dir('backend-Interview_schedule') {
+                    sh '''
+                    # Install dependencies
+                    mvn clean install
+                    '''
+                }
+            }
+        }
+        stage('Build Backend') {
+            steps {
                 sh '''
                 # Install dependencies
                 mvn clean install
