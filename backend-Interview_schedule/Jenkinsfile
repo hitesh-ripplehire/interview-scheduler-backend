@@ -16,20 +16,15 @@ pipeline {
                 }
             }
         }
-        stage('Build Backend') {
+        
+       stage('Run Backend') {
             steps {
-                sh '''
-                # Install dependencies
-                mvn clean install
-                '''
-            }
-        }
-        stage('Run Backend') {
-            steps {
-                sh '''
-                # Start the server
-                java -jar target/*.jar &
-                '''
+                dir('backend-Interview_schedule') {
+                    sh '''
+                    # Start the server
+                    java -jar target/*.jar &
+                    '''
+                }
             }
         }
     }
