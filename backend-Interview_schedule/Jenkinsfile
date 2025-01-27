@@ -1,3 +1,41 @@
+// pipeline {
+//     agent any
+//     stages {
+//         stage('Clone Repository') {
+//             steps {
+//                 git branch: 'main', url: 'https://github.com/hitesh-ripplehire/interview-scheduler-backend.git'
+//             }
+//         }
+//         stage('Build Backend') {
+//             steps {
+//                 dir('backend-Interview_schedule') {
+//                     sh '''
+//                     # Install dependencies
+//                     mvn clean install
+//                     '''
+//                 }
+//             }
+//         }
+        
+//        stage('Run Backend') {
+//             steps {
+//                 dir('backend-Interview_schedule') {
+//                     sh '''
+//                     # Start the server
+//                     java -jar target/*.jar &
+//                     '''
+//                 }
+//             }
+//         }
+//     }
+// }
+
+
+
+
+
+
+
 pipeline {
     agent any
     stages {
@@ -10,19 +48,18 @@ pipeline {
             steps {
                 dir('backend-Interview_schedule') {
                     sh '''
-                    # Install dependencies
+                    # Build the project with Maven
                     mvn clean install
                     '''
                 }
             }
         }
-        
-       stage('Run Backend') {
+        stage('Run Backend') {
             steps {
                 dir('backend-Interview_schedule') {
                     sh '''
-                    # Start the server
-                    java -jar target/*.jar &
+                    # Run the server in the background
+                    nohup java -jar target/*.jar &
                     '''
                 }
             }
