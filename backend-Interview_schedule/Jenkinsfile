@@ -36,6 +36,48 @@
 
 
 
+// pipeline {
+//     agent any
+//     stages {
+//         stage('Clone Repository') {
+//             steps {
+//                 git branch: 'main', url: 'https://github.com/hitesh-ripplehire/interview-scheduler-backend.git'
+//             }
+//         }
+//         stage('Build Backend') {
+//             steps {
+//                 dir('backend-Interview_schedule') {
+//                     sh '''
+//                     # Build the project with Maven
+//                     mvn clean install
+//                     '''
+//                 }
+//             }
+//         }
+//         stage('Run Backend') {
+//             steps {
+//                 dir('backend-Interview_schedule') {
+//                     sh '''
+//                     # Run the server in the background
+//                     nohup java -jar target/*.jar &
+//                     '''
+//                 }
+//             }
+//         }
+//     }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
 pipeline {
     agent any
     stages {
@@ -54,15 +96,31 @@ pipeline {
                 }
             }
         }
-        stage('Run Backend') {
+        stage('Deploy Backend') {
             steps {
                 dir('backend-Interview_schedule') {
                     sh '''
+                    # Stop any existing instance of the application
+                    if pgrep -f "java -jar target/.*.jar"; then
+                        pkill -f "java -jar target/.*.jar"
+                        echo "Stopped the existing backend process."
+                    fi
+
                     # Run the server in the background
-                    nohup java -jar target/*.jar &
+                    nohup java -jar target/*.jar > backend.log 2>&1 &
+
+                    echo "Backend deployed successfully and running."
                     '''
                 }
             }
+        }
+    }
+    post {
+        success {
+            echo "Backend build and deployment completed successfully!"
+        }
+        failure {
+            echo "Backend build or deployment failed."
         }
     }
 }
