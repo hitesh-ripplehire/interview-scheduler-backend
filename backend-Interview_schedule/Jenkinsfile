@@ -78,16 +78,70 @@
 
 
 
+// pipeline {
+//     agent any
+//     stages {
+//         stage('Clone Repository') {
+//             steps {
+//                 git branch: 'main', url: 'https://github.com/hitesh-ripplehire/interview-scheduler-backend.git'
+//             }
+//         }
+//         stage('Build Backend') {
+//             steps {
+//                 dir('backend-Interview_schedule') {
+//                     sh '''
+//                     # Build the project with Maven
+//                     mvn clean install
+//                     '''
+//                 }
+//             }
+//         }
+//         stage('Deploy Backend') {
+//             steps {
+//                 dir('backend-Interview_schedule') {
+//                     sh '''
+//                     # Stop any existing instance of the application
+//                     if pgrep -f "java -jar target/.*.jar"; then
+//                         pkill -f "java -jar target/.*.jar"
+//                         echo "Stopped the existing backend process."
+//                     fi
+
+//                     # Run the server in the background
+//                     nohup java -jar target/*.jar > backend.log 2>&1 &
+
+//                     echo "Backend deployed successfully and running."
+//                     '''
+//                 }
+//             }
+//         }
+//     }
+//     post {
+//         success {
+//             echo "Backend build and deployment completed successfully!"
+//         }
+//         failure {
+//             echo "Backend build or deployment failed."
+//         }
+//     }
+// }
+
+
+
+
+
+
 pipeline {
     agent any
     stages {
         stage('Clone Repository') {
             steps {
+                echo "Cloning the backend repository..."
                 git branch: 'main', url: 'https://github.com/hitesh-ripplehire/interview-scheduler-backend.git'
             }
         }
         stage('Build Backend') {
             steps {
+                echo "Building the backend application using Maven..."
                 dir('backend-Interview_schedule') {
                     sh '''
                     # Build the project with Maven
@@ -98,18 +152,20 @@ pipeline {
         }
         stage('Deploy Backend') {
             steps {
+                echo "Deploying the backend application..."
                 dir('backend-Interview_schedule') {
                     sh '''
                     # Stop any existing instance of the application
-                    if pgrep -f "java -jar target/.*.jar"; then
-                        pkill -f "java -jar target/.*.jar"
+                    PID=$(pgrep -f "java -jar target/.*.jar" || true)
+                    if [ ! -z "$PID" ]; then
+                        echo "Stopping existing backend process with PID $PID..."
+                        kill -9 $PID
                         echo "Stopped the existing backend process."
                     fi
 
-                    # Run the server in the background
-                    nohup java -jar target/*.jar > backend.log 2>&1 &
-
-                    echo "Backend deployed successfully and running."
+                    # Start the new instance
+                    nohup java -jar target/*.jar > /home/ubuntu/backend.log 2>&1 &
+                    echo "Backend deployed successfully and running in the background."
                     '''
                 }
             }
@@ -120,7 +176,7 @@ pipeline {
             echo "Backend build and deployment completed successfully!"
         }
         failure {
-            echo "Backend build or deployment failed."
+            echo "Backend build or deployment failed. Check the logs for details."
         }
     }
 }
