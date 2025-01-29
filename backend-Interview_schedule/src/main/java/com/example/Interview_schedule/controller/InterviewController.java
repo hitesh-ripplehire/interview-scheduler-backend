@@ -24,10 +24,10 @@ public class InterviewController {
         this.service = service;
     }
 
-//    @GetMapping
-//    public List<Interview> getAllInterviews() {
-//        return service.getAllInterviews();
-//    }
+   @GetMapping
+   public List<Interview> getAllInterviews() {
+       return service.getAllInterviews();
+   }
 
     @PostMapping
     public CompletableFuture<Interview> createInterview(@RequestBody Interview interview) {
