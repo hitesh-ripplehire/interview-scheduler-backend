@@ -239,6 +239,9 @@ pipeline {
                     nohup java -jar ${JAR_PATH} --server.port=${SERVER_PORT} > ${LOG_FILE} 2>&1 &
                     echo "Backend deployed successfully and running on port ${SERVER_PORT}."
                     '''
+                    sh 'pkill -f "Interview_schedule-0.0.1-SNAPSHOT.jar" || true'
+                    sh 'nohup java -jar /var/lib/jenkins/workspace/Schedule interview backend/backend-Interview_schedule/target/Interview_schedule-0.0.1-SNAPSHOT.jar > backend.log 2>&1 &'
+                
                 }
             }
         }
