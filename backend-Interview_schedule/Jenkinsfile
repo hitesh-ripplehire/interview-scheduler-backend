@@ -130,8 +130,72 @@
 
 
 
+// pipeline {
+//     agent any
+//     stages {
+//         stage('Clone Repository') {
+//             steps {
+//                 echo "Cloning the backend repository..."
+//                 git branch: 'main', url: 'https://github.com/hitesh-ripplehire/interview-scheduler-backend.git'
+//             }
+//         }
+//         stage('Build Backend') {
+//             steps {
+//                 echo "Building the backend application using Maven..."
+//                 dir('backend-Interview_schedule') {
+//                     sh '''
+//                     # Build the project with Maven
+//                     mvn clean install
+//                     '''
+//                 }
+//             }
+//         }
+//         stage('Deploy Backend') {
+//             steps {
+//                 echo "Deploying the backend application..."
+//                 dir('backend-Interview_schedule') {
+//                     sh '''
+//                     # Stop any existing instance of the application
+//                     PID=$(pgrep -f "java -jar target/.*.jar" || true)
+//                     if [ ! -z "$PID" ]; then
+//                         echo "Stopping existing backend process with PID $PID..."
+//                         kill -9 $PID
+//                         echo "Stopped the existing backend process."
+//                     fi
+
+//                     # Start the new instance
+//                     nohup java -jar target/*.jar > /home/ubuntu/backend.log 2>&1 &
+//                     echo "Backend deployed successfully and running in the background."
+//                     '''
+//                 }
+//             }
+//         }
+//     }
+//     post {
+//         success {
+//             echo "Backend build and deployment completed successfully!"
+//         }
+//         failure {
+//             echo "Backend build or deployment failed. Check the logs for details."
+//         }
+//     }
+// }
+
+
+
+
+
+
+
+
 pipeline {
     agent any
+    environment {
+        BACKEND_DIR = 'backend-Interview_schedule'
+        JAR_PATH = 'target/*.jar'
+        LOG_FILE = '/home/admin1/backend.log'
+        SERVER_PORT = '8081'
+    }
     stages {
         stage('Clone Repository') {
             steps {
@@ -142,30 +206,38 @@ pipeline {
         stage('Build Backend') {
             steps {
                 echo "Building the backend application using Maven..."
-                dir('backend-Interview_schedule') {
-                    sh '''
-                    # Build the project with Maven
-                    mvn clean install
-                    '''
+                dir(BACKEND_DIR) {
+                    sh 'mvn clean package -DskipTests'
                 }
             }
         }
         stage('Deploy Backend') {
             steps {
                 echo "Deploying the backend application..."
-                dir('backend-Interview_schedule') {
+                dir(BACKEND_DIR) {
                     sh '''
-                    # Stop any existing instance of the application
-                    PID=$(pgrep -f "java -jar target/.*.jar" || true)
+                    echo "Checking for existing backend process..."
+                    PID=$(lsof -t -i:${SERVER_PORT} || true)
+
                     if [ ! -z "$PID" ]; then
                         echo "Stopping existing backend process with PID $PID..."
                         kill -9 $PID
                         echo "Stopped the existing backend process."
+                    else
+                        echo "No existing backend process found."
                     fi
 
-                    # Start the new instance
-                    nohup java -jar target/*.jar > /home/ubuntu/backend.log 2>&1 &
-                    echo "Backend deployed successfully and running in the background."
+                    echo "Checking if JAR file exists..."
+                    JAR_FILE=$(ls ${JAR_PATH} 2>/dev/null | head -n 1)
+
+                    if [ -z "$JAR_FILE" ]; then
+                        echo "Error: No JAR file found in target/ directory!"
+                        exit 1
+                    fi
+
+                    echo "Starting new backend process..."
+                    nohup java -jar ${JAR_PATH} --server.port=${SERVER_PORT} > ${LOG_FILE} 2>&1 &
+                    echo "Backend deployed successfully and running on port ${SERVER_PORT}."
                     '''
                 }
             }
@@ -173,10 +245,10 @@ pipeline {
     }
     post {
         success {
-            echo "Backend build and deployment completed successfully!"
+            echo "✅ Backend build and deployment completed successfully!"
         }
         failure {
-            echo "Backend build or deployment failed. Check the logs for details."
+            echo "❌ Backend build or deployment failed. Check logs at ${LOG_FILE}."
         }
     }
 }
