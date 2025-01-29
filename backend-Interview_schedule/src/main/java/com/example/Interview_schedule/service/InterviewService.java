@@ -16,9 +16,9 @@ public class InterviewService {
         this.repository = repository;
     }
 
-//    public List<Interview> getAllInterviews() {
-//        return repository.findAll();
-//    }
+   public List<Interview> getAllInterviews() {
+       return repository.findAll();
+   }
 
     @Async
     public CompletableFuture<Interview> saveInterview(Interview interview) {
