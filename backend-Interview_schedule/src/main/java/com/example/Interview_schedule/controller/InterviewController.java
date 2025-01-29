@@ -28,11 +28,6 @@ public class InterviewController {
    public List<Interview> getAllInterviews() {
        return service.getAllInterviews();
    }
-    
-   @GetMapping
-   public String getMsg() {
-       return "Welcome to ..";
-   }
 
     @PostMapping
     public CompletableFuture<Interview> createInterview(@RequestBody Interview interview) {
