@@ -4,7 +4,7 @@ pipeline {
         BACKEND_DIR = 'backend-Interview_schedule'
         JAR_PATH = 'target/*.jar'
         // LOG_FILE = '/home/admin1/backend.log
-        LOG_FILE = '/var/lib/jenkins/workspace/Schedule\ interview\ backend/backend-Interview_schedule/target'
+        LOG_FILE = '/var/lib/jenkins/workspace/Schedule interview backend/backend-Interview_schedule/target'
         SERVER_PORT = '8081'
     }
     stages {
